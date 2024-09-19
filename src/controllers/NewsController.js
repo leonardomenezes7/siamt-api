@@ -1,14 +1,41 @@
 const AppError = require("../utils/AppError")
+const knex = require("../database/knex")
+const dayjs = require("dayjs")
 
 class NewsController {
-  create(request, response) {
-    const { name, email, password } = request.body
+  async create(request, response) {
+    const { title, author, description, image } = request.body
 
-    if (!name) {
-      throw new AppError("O nome é obrigatório.")
+    if (!title) {
+      throw new AppError("O título é obrigatório.")
     }
 
-    response.status(201).json({ name, email, password })
+    if (!author) {
+      throw new AppError("Informe o autor.")
+    }
+
+    if (!description) {
+      throw new AppError("A descrição é obrigatória.")
+    }
+
+    if (!image) {
+      throw new AppError("Escolha uma imagem.")
+    }
+
+    const date = new Date()
+    const formattedDate = dayjs(date).format("YYYY-MM-DD")
+
+    const newNotice = {
+      title,
+      author,
+      description,
+      image,
+      created_at: formattedDate
+    }
+
+    await knex("news").insert(newNotice)
+
+    return response.json()
   }
 }
 
